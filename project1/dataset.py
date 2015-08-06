@@ -11,7 +11,7 @@ from fuel import config
 from fuel.transformers import Transformer
 from foxhound.utils import shuffle
 from pycocotools.coco import COCO
-from config import COCO_DIR
+from config import COCO_DIR, SBU_DIR
 
 def coco(mode="dev", n_captions=1, test_size=None):
     """loads coco data into train and test features and targets.
@@ -56,9 +56,8 @@ def sbuXYFilenames(n_examples=None):
     """
     n_examples to try to load.  It might not load all of them
     """
-    sbu_path = "/home/luke/datasets/sbu/"
-    sbu_feature_path = os.path.join(sbu_path, "features")
-    sbu_caption_path = os.path.join(sbu_path, "SBU_captioned_photo_dataset_captions.txt")
+    sbu_feature_path = os.path.join(SBU_DIR, "features")
+    sbu_caption_path = os.path.join(SBU_DIR, "SBU_captioned_photo_dataset_captions.txt")
     fns = os.listdir(sbu_feature_path)
     if n_examples:
         fns = fns[:n_examples]
