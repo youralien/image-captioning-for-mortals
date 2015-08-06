@@ -79,25 +79,32 @@ def trainencoder(
     # learned constrastive im embedding, learned contrastive s embedding
     lcim, lcs = s.apply(image_vects_k, word_vects_k)
 
-    # l2norms
-    lim = l2norm(lim)
-    lcim = l2norm(lcim)
-    ls = l2norm(ls)
-    lcs = l2norm(lcs)
+    def compute_pairwise_ranking_cost(margin=0.2):
+        """
+        margin: alpha term, should not be more than 1
 
-    margin = 0.2 # alpha term, should not be more than 1!
+        identical cost code thanks to Ryan Kiros
+        https://github.com/youralien/skip-thoughts/blob/master/eval_rank.py
+        """
+        # l2norms
+        lim = l2norm(lim)
+        lcim = l2norm(lcim)
+        ls = l2norm(ls)
+        lcs = l2norm(lcs)
 
-    # pairwise ranking loss (https://github.com/youralien/skip-thoughts/blob/master/eval_rank.py)
-    cost_im = margin - (lim * ls).sum(axis=1) + (lim * lcs).sum(axis=1)
-    cost_im = cost_im * (cost_im > 0.) # this is like the max(0, pairwise-ranking-loss)
-    cost_im = cost_im.sum(0)
+        cost_im = margin - (lim * ls).sum(axis=1) + (lim * lcs).sum(axis=1)
+        cost_im = cost_im * (cost_im > 0.) # this is like the max(0, pairwise-ranking-loss)
+        cost_im = cost_im.sum(0)
 
-    cost_s = margin - (ls * lim).sum(axis=1) + (ls * lcim).sum(axis=1)
-    cost_s = cost_s * (cost_s > 0.) # this is like max(0, pairwise-ranking-loss)
-    cost_s = cost_s.sum(0)
+        cost_s = margin - (ls * lim).sum(axis=1) + (ls * lcim).sum(axis=1)
+        cost_s = cost_s * (cost_s > 0.) # this is like max(0, pairwise-ranking-loss)
+        cost_s = cost_s.sum(0)
 
-    cost = cost_im + cost_s
-    cost.name = "pairwise_ranking_loss"
+        cost = cost_im + cost_s
+        cost.name = "pairwise_ranking_loss"
+        return cost
+
+    cost = compute_pairwise_ranking_cost()
 
     # function(s) to produce embedding
     if separate_emb:
