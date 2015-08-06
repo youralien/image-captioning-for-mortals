@@ -1,0 +1,1 @@
+MODEL_FILES_DIR = "/home/luke/datasets/coco/predict/"
