@@ -11,8 +11,7 @@ from fuel import config
 from fuel.transformers import Transformer
 from foxhound.utils import shuffle
 from pycocotools.coco import COCO
-
-COCO_DIR='/home/luke/datasets/coco'
+from config import COCO_DIR
 
 def coco(mode="dev", n_captions=1, test_size=None):
     """loads coco data into train and test features and targets.
