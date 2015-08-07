@@ -11,7 +11,7 @@ from fuel import config
 from fuel.transformers import Transformer
 from foxhound.utils import shuffle
 from pycocotools.coco import COCO
-from config import COCO_DIR, SBU_DIR
+from config import COCO_DIR, SBU_DIR, FLICKR8K_DIR, FLICKR30K_DIR
 
 def coco(mode="dev", n_captions=1, test_size=None):
     """loads coco data into train and test features and targets.
@@ -51,6 +51,51 @@ def sbu(mode="dev", n_sbu=None, test_size=None):
 
     sbuX, sbuY, _ = sbuXYFilenames(n_sbu)
     return train_test_split(sbuX, sbuY, test_size=test_size)
+
+def flickr8kXYFilenames(n_examples=None):
+    feature_path = os.path.join(FLICKR8K_DIR, "features")
+    caption_path = os.path.join(FLICKR8K_DIR, "annotations/Flickr8k.token.txt")
+
+    f = open(caption_path, 'r')
+    lines = f.read().splitlines()
+
+    data_dict = {}
+
+    def parse(line):
+        split = line.split('#')
+        img = split[0]
+        caption_ugly = split[1:]
+        if isinstance(caption_ugly, list):
+            caption_ugly = ' '.join(caption_ugly)
+        i, caption = caption_ugly.split('\t')
+        handful = data_dict.get(img, [])
+        handful.append(caption)
+        data_dict[img] = handful
+
+    print("Parsing flickr8k captions...")
+    for i, line in enumerate(lines):
+        parse(line)
+
+    fns, Y = zip(*data_dict.items())
+    X = []
+    successes = []
+
+    print("Loading flickr8k features...")
+    for i in range(len(fns)):
+        fn = fns[i]
+        try:
+            name = fn.split('.')[0]
+            X.append(np.load(os.path.join(feature_path, "%s.npy" % name)))
+            successes.append(i)
+        except Exception, e:
+            continue
+
+    # get only the successful funs
+    if successes:
+        Y = operator.itemgetter(*successes)(Y)
+        fns = operator.itemgetter(*successes)(fns)
+
+    return X, Y, fns
 
 def sbuXYFilenames(n_examples=None):
     """
