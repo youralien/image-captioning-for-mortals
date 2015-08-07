@@ -59,8 +59,10 @@ def prepVect(min_df=2, max_features=50000, n_captions=5, n_sbu=None,
     # if not multilabel:
     return vect
 
-dataset_name = 'coco_train2014+sbu100000'
-
+dataset_name = 'coco_train2014'
+n_sbu=None
+if n_sbu:
+    dataset_name += "+sbu%d" % n_sbu
 # global vectorizer
 vect_name = 'tokenizer_%s' % dataset_name
 mlb_name = 'mlb_%s' % dataset_name
@@ -73,12 +75,12 @@ try:
     print "Tokenizer loaded from file."
 except:
     if mlb_name:
-        vect, mlb = prepVect(n_sbu=100000, n_captions=1, multilabel=True)
+        vect, mlb = prepVect(n_sbu=n_sbu, n_captions=1, multilabel=True)
         ModelIO.save(vect, vect_name)
         ModelIO.save(mlb, mlb_name)
         print "Saved %s, %s for future use." % (vect_name, mlb_name)
     else:
-        vect = prepVect(n_sbu=100000, n_captions=1)
+        vect = prepVect(n_sbu=n_sbu, n_captions=1)
         ModelIO.save(vect, vect_name)
         print "Saved %s for future use." % vect_name
 
