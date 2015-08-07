@@ -52,9 +52,13 @@ def sbu(mode="dev", n_sbu=None, test_size=None):
     sbuX, sbuY, _ = sbuXYFilenames(n_sbu)
     return train_test_split(sbuX, sbuY, test_size=test_size)
 
-def flickr8kXYFilenames(n_examples=None):
-    feature_path = os.path.join(FLICKR8K_DIR, "features")
-    caption_path = os.path.join(FLICKR8K_DIR, "annotations/Flickr8k.token.txt")
+def flickrXYFilenames(n_examples=None, dataType='8k'):
+    if dataType == '8k':
+        FLICKR_DIR = FLICKR8K_DIR
+    else:
+        FLICKR_DIR = FLICKR30K_DIR
+    feature_path = os.path.join(FLICKR_DIR, "features")
+    caption_path = os.path.join(FLICKR_DIR, "annotations/tokens.txt")
 
     f = open(caption_path, 'r')
     lines = f.read().splitlines()
@@ -72,7 +76,7 @@ def flickr8kXYFilenames(n_examples=None):
         handful.append(caption)
         data_dict[img] = handful
 
-    print("Parsing flickr8k captions...")
+    print("Parsing flickr%s captions..." % dataType)
     for i, line in enumerate(lines):
         parse(line)
 
@@ -80,7 +84,7 @@ def flickr8kXYFilenames(n_examples=None):
     X = []
     successes = []
 
-    print("Loading flickr8k features...")
+    print("Loading flickr%s features..." % dataType)
     for i in range(len(fns)):
         fn = fns[i]
         try:
