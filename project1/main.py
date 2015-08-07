@@ -1,6 +1,7 @@
 # scientific python
 import theano
 from theano import tensor
+from sklearn.cross_validation import train_test_split
 
 # blocks model building
 from blocks.initialization import Uniform, Constant
@@ -19,7 +20,7 @@ from cuboid.extensions import UserFunc, LogToFile
 # local imports
 from bricks import Encoder
 from pipeline import DataETL, ModelEval
-from dataset import coco, sbu
+from dataset import coco, sbu, cocoXYFilenames, flickrXYFilenames
 from utils import l2norm, ModelIO
 from config import MODEL_FILES_DIR
 
@@ -34,19 +35,37 @@ def trainencoder(
     , test_size=1000 # per dataset
     , mode='dev'
     ):
-    trX, teX, trY, teY = coco(mode=mode, n_captions=n_captions, test_size=test_size)
-    if n_sbu:
-        sbutrX, sbuteX, sbutrY, sbuteY = sbu(mode=mode, test_size=test_size)
-        pairs = (
-              (trX, sbutrX)
-            , (teX, sbuteX)
-            , (trY, sbutrY)
-            , (teY, sbuteY)
-            )
+    if mode=="coco120k+flickr38k":
+        XYsplit_cum = ([], [], [], [])
+        xyloaders = [
+              "cocoXYFilenames(dataType='train2014')"
+            , "cocoXYFilenames(dataType='val2014')"
+            , "flickrXYFilenames(dataType='8k')"
+            , "flickrXYFilenames(dataType='30k')"
+            ]
+        ntrains = [80000, 40000, 8000, 30000]
 
-        for coco_data, sbu_data in pairs:
-            if isinstance(coco_data, list):
-                coco_data.extend(sbu_data)                        
+        for xyloader, ntrain in zip(xyloaders, ntrains):
+            X, Y, _ = eval(xyloader)
+            XYsplit = train_test_split(X, Y, train_size=ntrain)
+            for i in range(len(XYsplit)):
+                XYsplit_cum[i].extend(XYsplit[i])
+
+        trX, teX, trY, teY = XYsplit_cum
+    else:
+        trX, teX, trY, teY = coco(mode=mode, n_captions=n_captions, test_size=test_size)
+        if n_sbu:
+            sbutrX, sbuteX, sbutrY, sbuteY = sbu(mode=mode, test_size=test_size)
+            pairs = (
+                  (trX, sbutrX)
+                , (teX, sbuteX)
+                , (trY, sbutrY)
+                , (teY, sbuteY)
+                )
+
+            for coco_data, sbu_data in pairs:
+                if isinstance(coco_data, list):
+                    coco_data.extend(sbu_data)
 
     print("n_train: %d" % len(trX))
     print("n_test: %d" % len(teX))
@@ -78,7 +97,7 @@ def trainencoder(
 
     # learned constrastive im embedding, learned contrastive s embedding
     lcim, lcs = s.apply(image_vects_k, word_vects_k)
-    
+
     # identical cost code thanks to Ryan Kiros
     # https://github.com/youralien/skip-thoughts/blob/master/eval_rank.py
     lim = l2norm(lim)
@@ -109,7 +128,7 @@ def trainencoder(
         sbuname = "sbu%d+" % n_sbu
     else:
         sbuname = ''
-    name = "%sproject1.jointembedder" % (sbuname)
+    name = "%sproject1.%s.jointembedder" % (sbuname, mode)
     savename = MODEL_FILES_DIR + name
 
     def save_function(self):
@@ -184,4 +203,4 @@ def trainencoder(
     main_loop.run()
 
 if __name__ == '__main__':
-    trainencoder(mode='full', separate_emb=True)
+    trainencoder(mode='coco120k+flickr38k', separate_emb=True)
