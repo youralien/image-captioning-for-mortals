@@ -22,6 +22,7 @@ from dataset import (coco, cocoXYFilenames, FoxyDataStream, GloveTransformer,
     ShuffleBatch, FoxyIterationScheme, loadFeaturesTargets, fillOutFilenames,
     sbuXYFilenames)
 from utils import dict2json, vStackMatrices, DecimalEncoder, ModelIO
+import config
 
 def sampleCaptions(ymb, K=1):
     """ymb = minibatch of captions
@@ -124,7 +125,7 @@ class DataETL():
             , train_iterator_k
             , FoxyIterationScheme(len(trX), batch_size)
             )
-        glove_version = "glove.6B.%sd.txt.gz" % embedding_dim
+        glove_version = "glove.{0}B.{1}d.txt".format(config.n_billion_tokens, embedding_dim)
         train_transformer = GloveTransformer(
             glove_version, data_stream=train_stream, vectorizer=vect
             )

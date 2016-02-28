@@ -1,5 +1,6 @@
-MODEL_FILES_DIR = "./"
-COCO_DIR="/home/luke/datasets/coco"
-SBU_DIR = "/home/luke/datasets/sbu/"
-FLICKR8K_DIR = "/home/luke/datasets/flickr8k/"
-FLICKR30K_DIR = "/home/luke/datasets/flickr30k/"
+MODEL_FILES_DIR = "./modelfiles"
+COCO_DIR="/home/rlouie/datasets/coco"
+SBU_DIR = "/home/rlouie/datasets/sbu/"
+FLICKR8K_DIR = "/home/rlouie/datasets/flickr8k/"
+FLICKR30K_DIR = "/home/rlouie/datasets/flickr30k/"
+n_billion_tokens = 6 # using glove.6B.zip
