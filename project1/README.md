@@ -14,7 +14,7 @@
 ##Pre-trained Models
 --------------------
 ###GloVe Vector Files
-In your fuel config file (i.e. ```~/.fuelrc```), ```data_path``` should be set to a datasets directory (i.e. ```~/datasets```). In this directory, you should create a folder to store the GloVe vector file named ```glove```.  I am using the GloVe Vectors with 6 billion tokens and 300 dimensional vectors, trained on the Gigaword + Wikipedia corpus, [download link here](http://www-nlp.stanford.edu/data/glove.6B.300d.txt.gz).  If you did it all correct, the path to the GloVe vectors should look like ```~/datasets/glove/glove.6B.300d.txt.gz```.
+In your fuel config file (i.e. ```~/.fuelrc```), ```data_path``` should be set to a datasets directory (i.e. ```~/datasets```). In this directory, you should create a folder to store the GloVe vector file named ```glove```.  I am using the GloVe Vectors with 6 billion tokens and 300 dimensional vectors, trained on the Gigaword + Wikipedia corpus, [download link can be found on Glove website](http://www-nlp.stanford.edu/projects/glove).  If you did it all correct, the path to the GloVe vectors should look like ```~/datasets/glove/glove.6B.300d.txt.gz```.
 
 ###Image Features
 You can precompute image features for all the image data using the IndicoAPI (wait for easynet support, which gives back the 4096 length vectors which you want!)
