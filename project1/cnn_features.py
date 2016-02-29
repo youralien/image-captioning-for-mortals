@@ -4,10 +4,10 @@ compute cnn features for coco dataset
 =====================================
 """
 
-# from sklearn_theano.feature_extraction import OverfeatTransformer
-# tf = OverfeatTransformer(output_layers=[-3])
+from sklearn_theano.feature_extraction import OverfeatTransformer
+tf = OverfeatTransformer(output_layers=[-3])
 
-import time
+import sys
 import os
 import numpy as np
 from PIL import Image
@@ -43,13 +43,22 @@ def cache_image_features(img_dir, dest_dir):
         # FIX: mkdir not working
         os.mkdir(dest_dir)
 
-    fns = os.listdir(img_dir)
+    fns = os.listdir(img_dir)[:128]
     full_fns = [os.path.join(img_dir,fn) for fn in fns]
+    
+    # load images and transform in batches
+    cnn_features_to_stack = []
+    batch_size = 32
+    for iter, (start, end) in enumerate(zip(range(0, len(fns), batch_size), range(batch_size, len(fns), batch_size))):
+        sys.stdout.write("Batch %d" % iter)
+        X_batch = load_images_to_matrix(full_fns[start:end])
+        cnn_features_to_stack.append(tf.transform(X_batch))
+        sys.stdout.flush()
+    cnn_features = np.vstack(cnn_features_to_stack)
 
-    for i, fn in enumerate(fns):
-        features = analyze(img_dir + fn)
+    for count, fn in enumerate(fns):
         fn_w_out_extension = fn.split('.')[0]
-        np.save(dest_dir+fn_w_out_extension, features)
+        np.save(dest_dir+fn_w_out_extension, cnn_features[count])
 
 def cache_train():
     cache_image_features(
@@ -62,4 +71,4 @@ def cache_valid():
         , "{}/features/val2014/".format(config.COCO_DIR))
 
 if __name__ == '__main__':
-    test_load_images_to_matrix()
+    cache_train()
